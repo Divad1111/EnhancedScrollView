@@ -10,3 +10,10 @@
 *.tmp
 *.sln
 
+/.vsconfig
+.vs
+Logs
+obj
+Temp
+/UserSettings/EditorUserSettings.asset
+UserSettings
