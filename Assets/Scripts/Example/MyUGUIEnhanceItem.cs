@@ -5,6 +5,8 @@ using UnityEngine.EventSystems;
 
 public class MyUGUIEnhanceItem : EnhanceItem
 {
+    public Text txtIndex;
+    public Text txtRealIndex;
     private Button uButton;
     private RawImage rawImage;
 
@@ -32,5 +34,18 @@ public class MyUGUIEnhanceItem : EnhanceItem
         if (rawImage == null)
             rawImage = GetComponent<RawImage>();
         rawImage.color = isCenter ? Color.white : Color.gray;
+    }
+
+    public override void SetUniqueIndex(int index)
+    {
+        base.SetUniqueIndex(index);
+
+        txtIndex.text = index.ToString();
+    }
+
+    public override void SetRealIndex(int index)
+    {
+        base.SetRealIndex(index);
+        txtRealIndex.text = index.ToString();
     }
 }
