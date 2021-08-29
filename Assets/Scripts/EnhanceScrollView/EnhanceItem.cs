@@ -3,16 +3,6 @@ using System.Collections;
 
 public class EnhanceItem : MonoBehaviour
 {
-
-    //public enum EDir
-    //{
-    //    Left,
-    //    Right,
-    //    Top,
-    //    Buttom,
-    //    Middle,
-    //}
-
     private int uniqueIndex = 0;
     public virtual int UniqueIndex
     {
@@ -61,16 +51,26 @@ public class EnhanceItem : MonoBehaviour
         mEsv = esv;
     }
 
+    public float GetWidth()
+    {
+        return (mTrs as RectTransform).sizeDelta.x;
+    }
+
+    public float GetHeight()
+    {
+        return (mTrs as RectTransform).sizeDelta.y;
+    }
+
     // Update Item's status
     // 1. position
     // 2. scale
     // 3. "depth" is 2D or z Position in 3D to set the front and back item
     public void UpdateScrollViewItems(
-        float xValue,
+        float yValue,
         float depthCurveValue,
         int depthFactor,
         float itemCount,
-        float yValue,
+        float xValue,
         float scaleValue
         )
     {
@@ -87,36 +87,7 @@ public class EnhanceItem : MonoBehaviour
         // scale
         targetScale.x = targetScale.y = scaleValue;
         mTrs.localScale = targetScale;
-
-        
-        
-        
     }
-
-    //EDir GetDir(bool isHorizontal)
-    //{
-    //    var middlePos = mEsv.GetCenterPos();
-        
-    //    if (isHorizontal)
-    //    {
-    //        var xPos = mTrs.localPosition.x;
-    //        if (xPos < middlePos)
-    //            return EDir.Left;
-    //        if (xPos > middlePos)
-    //            return EDir.Right;
-    //        return EDir.Middle;
-    //    }
-    //    else
-    //    {
-    //        var yPos = mTrs.localPosition.y;
-    //        if (yPos > middlePos)
-    //            return EDir.Top;
-    //        if (yPos < middlePos)
-    //            return EDir.Buttom;
-    //        return EDir.Middle;
-    //    }
-    //}
-    
 
     public void Show(bool isShow)
     {
@@ -131,7 +102,7 @@ public class EnhanceItem : MonoBehaviour
     protected virtual void OnClickEnhanceItem()
     {
         if(mEsv != null)
-            mEsv.SetHorizontalTargetItemIndex(this);
+            mEsv.SetVerticalTargetItemIndex(this);
     }
 
     protected virtual void OnStart()
