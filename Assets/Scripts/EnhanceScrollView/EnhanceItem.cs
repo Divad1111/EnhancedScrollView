@@ -24,6 +24,12 @@ public class EnhanceItem : MonoBehaviour
         //set { this.curRealIndex = value; }
     }
 
+    private int curDataIndex = 0;
+    public int DataIndex
+    {
+        get { return curDataIndex; }
+    }
+
     // Curve center offset 
     private float dCurveCenterOffset = 0.0f;
     public float CenterOffSet
@@ -130,5 +136,10 @@ public class EnhanceItem : MonoBehaviour
     public virtual void SetUniqueIndex(int index)
     {
         uniqueIndex = index;
+    }
+
+    public virtual void SetDataIndex(int index)
+    {
+        curDataIndex = index;
     }
 }

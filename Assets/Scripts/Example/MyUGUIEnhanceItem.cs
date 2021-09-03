@@ -7,6 +7,7 @@ public class MyUGUIEnhanceItem : EnhanceItem
 {
     public Text txtIndex;
     public Text txtRealIndex;
+    public Text dataIndex;
     private Button uButton;
     private RawImage rawImage;
 
@@ -47,5 +48,11 @@ public class MyUGUIEnhanceItem : EnhanceItem
     {
         base.SetRealIndex(index);
         txtRealIndex.text = index.ToString();
+    }
+
+    public override void SetDataIndex(int index)
+    {
+        base.SetDataIndex(index);
+        dataIndex.text = index.ToString();
     }
 }
