@@ -24,10 +24,17 @@ public class EnhanceItem : MonoBehaviour
         //set { this.curRealIndex = value; }
     }
 
-    private int curDataIndex = 0;
     public int DataIndex
     {
-        get { return curDataIndex; }
+        get
+        {   
+            var maxUniqueIndex = mEsv.maxUniqueIndex;
+            int dataIndex = uniqueIndex % maxUniqueIndex;
+            if (uniqueIndex < 0)
+                dataIndex = Mathf.Abs((maxUniqueIndex + uniqueIndex) % maxUniqueIndex);
+
+            return dataIndex;
+        }
     }
 
     // Curve center offset 
@@ -39,7 +46,7 @@ public class EnhanceItem : MonoBehaviour
     }
     private Transform mTrs;
 
-    EnhanceScrollView mEsv;
+    protected EnhanceScrollView mEsv;
 
     void Awake()
     {
@@ -134,12 +141,12 @@ public class EnhanceItem : MonoBehaviour
     }
 
     public virtual void SetUniqueIndex(int index)
-    {
-        uniqueIndex = index;
-    }
-
-    public virtual void SetDataIndex(int index)
-    {
-        curDataIndex = index;
+    {   
+        if (uniqueIndex != index || index == 0)
+        {
+            uniqueIndex = index;
+            if (mEsv != null && mEsv.refreshItemCallback != null)
+                mEsv.refreshItemCallback.Invoke(DataIndex, transform);
+        }
     }
 }

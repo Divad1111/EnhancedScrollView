@@ -42,17 +42,13 @@ public class MyUGUIEnhanceItem : EnhanceItem
         base.SetUniqueIndex(index);
 
         txtIndex.text = index.ToString();
+        
+        dataIndex.text = DataIndex.ToString();
     }
 
     public override void SetRealIndex(int index)
     {
         base.SetRealIndex(index);
         txtRealIndex.text = index.ToString();
-    }
-
-    public override void SetDataIndex(int index)
-    {
-        base.SetDataIndex(index);
-        dataIndex.text = index.ToString();
     }
 }

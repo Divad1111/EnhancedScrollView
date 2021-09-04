@@ -46,9 +46,9 @@ public class EnhanceScrollView : MonoBehaviour
     public float curVerticalValue = 0.5f;
 
     // 最大唯一索引
-    private int maxUniqueIndex = 20;
-    private int baseUniqueIndex = 0;
-    private Action<int, Transform> refreshItemCallback;
+    public int maxUniqueIndex = 20;
+    public Action<int, Transform> refreshItemCallback { get; private set; }
+    private bool needUpdateUniqueIndex = true;
 
     // 循环模式
     public bool loopMode = false;
@@ -84,8 +84,8 @@ public class EnhanceScrollView : MonoBehaviour
             var curEnhanceItems = listEnhanceItems[i];
             curEnhanceItems.CurveOffSetIndex = i;
             curEnhanceItems.CenterOffSet = dFactor * (mCenterIndex - index);
-            curEnhanceItems.SetUniqueIndex(i);
             curEnhanceItems.SetEnhanceScrollView(this);
+            curEnhanceItems.SetUniqueIndex(i);
             curEnhanceItems.SetSelectState(false);
             GameObject obj = curEnhanceItems.gameObject;
 
@@ -129,7 +129,6 @@ public class EnhanceScrollView : MonoBehaviour
             SortEnhanceItem();
             originVerticalValue = targetValue;
             UpdateEnhanceScrollView(targetValue);
-            //UpdateUniqueIndex();
             this.OnTweenOver();
         }
         else
@@ -170,6 +169,9 @@ public class EnhanceScrollView : MonoBehaviour
 
     void UpdateUniqueIndex()
     {
+        if (!needUpdateUniqueIndex)
+            return;
+
         if (maxUniqueIndex <= 0)
         {
             Debug.LogError("请先调用初始化函数Init");
@@ -181,37 +183,19 @@ public class EnhanceScrollView : MonoBehaviour
         foreach (var item in listSortedItems)
         {
             var itemUniqueIndex = item.UniqueIndex;
-            var itemNewUniqueIndex = baseUniqueIndex + curCenterItem.UniqueIndex + (item.RealIndex - curCenterItem.RealIndex);
-            bool needRefresh = (itemUniqueIndex != itemNewUniqueIndex) || (itemUniqueIndex == itemNewUniqueIndex && itemUniqueIndex == 0);
+            var itemNewUniqueIndex = curCenterItem.UniqueIndex + (item.RealIndex - curCenterItem.RealIndex);
+            item.SetUniqueIndex(itemNewUniqueIndex);
 
             if (loopMode)
             {
                 item.Show(true);
-                if (needRefresh)
-                {
-                    int dataIndex = itemNewUniqueIndex % maxUniqueIndex;
-                    if (itemNewUniqueIndex < 0)
-                        dataIndex = Mathf.Abs((maxUniqueIndex + itemNewUniqueIndex) % maxUniqueIndex);
-
-                    item.SetDataIndex(dataIndex);
-                    refreshItemCallback?.Invoke(dataIndex, item.transform);
-                }   
             }
             else
             {
                 bool needShow = itemNewUniqueIndex >= 0 && itemNewUniqueIndex < maxUniqueIndex;
                 item.Show(needShow);
-                int dataIndex = itemNewUniqueIndex % maxUniqueIndex;
-                if (needShow && needRefresh)
-                    refreshItemCallback?.Invoke(dataIndex, item.transform);
-
-                item.SetDataIndex(dataIndex);
             }
-            
-            item.SetUniqueIndex(itemNewUniqueIndex);
         }
-
-        baseUniqueIndex = 0;
     }
 
     void Update()
@@ -244,6 +228,8 @@ public class EnhanceScrollView : MonoBehaviour
             preCenterItem.SetSelectState(false);
         if (curCenterItem != null)
             curCenterItem.SetSelectState(true);
+
+        needUpdateUniqueIndex = true;
     }
 
     // Get the evaluate value to set item's scale
@@ -295,9 +281,9 @@ public class EnhanceScrollView : MonoBehaviour
 
         // calculate the direction of moving
         //float centerXValue = positionCurve.Evaluate(0.5f) * totalVerticalHeight;
-        float centerXValue = GetCenterPos();
+        float centerYValue = GetCenterPos();
         bool isBottom = false;
-        if (selectItem.transform.localPosition.y < centerXValue)
+        if (selectItem.transform.localPosition.y < centerYValue)
             isBottom = true;
 
         // calculate the offset * dFactor
@@ -305,11 +291,11 @@ public class EnhanceScrollView : MonoBehaviour
         float dvalue = 0.0f;
         if (isBottom)
         {
-            dvalue = -dFactor * moveIndexCount;
+            dvalue = dFactor * moveIndexCount;
         }
         else
         {
-            dvalue = dFactor * moveIndexCount;
+            dvalue = -1 * dFactor * moveIndexCount;
         }
         float originValue = curVerticalValue;
         LerpTweenToTarget(originValue, curVerticalValue + dvalue, true);
@@ -325,28 +311,47 @@ public class EnhanceScrollView : MonoBehaviour
 
         bool isForward = index < curCenterItem.UniqueIndex;
         bool isBackwards = index > curCenterItem.UniqueIndex;
-        //EnhanceItem jumpToItem = null;
+        EnhanceItem jumpToItem = null;
         //int offset = 0;
         if (isForward)
         {
             var offset = Mathf.Min(curCenterItem.UniqueIndex - index, mCenterIndex);
-            baseUniqueIndex = index + offset;
-            var jumpToItem = GetPrevItem(offset);
-            SetVerticalTargetItemIndex(jumpToItem);
+            jumpToItem = GetPrevItem(offset);
             
         }
         else if (isBackwards)
         {
             var offset = Mathf.Min(index - curCenterItem.UniqueIndex, mCenterIndex);
-            baseUniqueIndex = index - offset;
-            var jumpToItem = GetNextItem(offset);
+            jumpToItem = GetNextItem(offset);
+        }
+
+        if(jumpToItem != null)
+        {
+            //重置唯一索引
+            jumpToItem.SetUniqueIndex(index);
+            for (int i = 1; i <= mCenterIndex; i++)
+            {
+                var curPrevItem = GetPrevItem(i, jumpToItem);
+                curPrevItem.SetUniqueIndex(index - i);
+                var curNextItem = GetNextItem(i, jumpToItem);
+                curNextItem.SetUniqueIndex(index + i);
+            }
+
+            if (listEnhanceItems.Count % 2 == 0)
+            {
+                int lastIndex = mCenterIndex + 1;
+                var curNextItem = GetNextItem(lastIndex, jumpToItem);
+                curNextItem.SetUniqueIndex(index + lastIndex);
+            }
+
+            needUpdateUniqueIndex = false;
             SetVerticalTargetItemIndex(jumpToItem);
         }
     }
     
 
     // Click the right button to select the next item.
-    public void OnBtnBottomClick()
+    public void OnBtnPrevClick()
     {
         if (!canChangeItem || !CanMoveBottom())
             return;
@@ -356,11 +361,11 @@ public class EnhanceScrollView : MonoBehaviour
         //SetVerticalTargetItemIndex(listEnhanceItems[targetIndex]);
 
 
-        SetVerticalTargetItemIndex(GetNextItem());
+        SetVerticalTargetItemIndex(GetPrevItem());
     }
 
     // Click the left button the select next next item.
-    public void OnBtnTopClick()
+    public void OnBtnNextClick()
     {
         if (!canChangeItem || !CanMoveTop())
             return;
@@ -368,7 +373,7 @@ public class EnhanceScrollView : MonoBehaviour
         //if (targetIndex < 0)
         //    targetIndex = listEnhanceItems.Count - 1;
         //SetVerticalTargetItemIndex(listEnhanceItems[targetIndex]);
-        SetVerticalTargetItemIndex(GetPrevItem());
+        SetVerticalTargetItemIndex(GetNextItem());
     }
 
     bool CanMoveTop()
@@ -387,21 +392,39 @@ public class EnhanceScrollView : MonoBehaviour
         return curCenterItem.UniqueIndex < maxUniqueIndex; 
     }
 
-    EnhanceItem GetPrevItem(int amount = 1)
+    /// <summary>
+    /// 获取基于指定项的前几条项
+    /// </summary>
+    /// <param name="amount">数量， 默认1</param>
+    /// <param name="baseItem">初始项，默认是中心项</param>
+    /// <returns>返回获取的项</returns>
+    EnhanceItem GetPrevItem(int amount = 1, EnhanceItem baseItem = null)
     {
-        var targetIndex = curCenterItem.CurveOffSetIndex - amount;
-        if (targetIndex < 0)
-            targetIndex = listEnhanceItems.Count - amount;
+        if (baseItem == null)
+            baseItem = curCenterItem;
+
+        var targetIndex = baseItem.CurveOffSetIndex + amount;
+        var itemAmount = listEnhanceItems.Count;
+        if (targetIndex >= itemAmount)
+            targetIndex = targetIndex % itemAmount;
 
         return listEnhanceItems[targetIndex];
     }
 
-    EnhanceItem GetNextItem(int amount = 1)
+    /// <summary>
+    /// 获取基于指定项的后几条项
+    /// </summary>
+    /// <param name="amount">数量， 默认1</param>
+    /// <param name="baseItem">初始项，默认是中心项</param>
+    /// <returns>返回获取的项</returns>
+    EnhanceItem GetNextItem(int amount = 1, EnhanceItem baseItem = null)
     {
-        var targetIndex = curCenterItem.CurveOffSetIndex + amount;
-        var itemAmount = listEnhanceItems.Count;
-        if (targetIndex >= itemAmount)
-            targetIndex = targetIndex % itemAmount;
+        if (baseItem == null)
+            baseItem = curCenterItem;
+
+        var targetIndex = baseItem.CurveOffSetIndex - amount;
+        if (targetIndex < 0)
+            targetIndex = listEnhanceItems.Count - amount;
 
         return listEnhanceItems[targetIndex];
     }
