@@ -87,7 +87,7 @@ public class EnhanceItem : MonoBehaviour
         float scaleValue
         )
     {
-        Vector3 targetPos = Vector3.one;
+        Vector3 targetPos = Vector3.zero;
         Vector3 targetScale = Vector3.one;
         // position
         targetPos.x = xValue;
