@@ -30,7 +30,18 @@ public class EnhanceScrollView : MonoBehaviour
     public bool enableLerpTween = true;
 
     // center and preCentered item
-    private EnhanceItem curCenterItem;
+    EnhanceItem mCurCenterItem;
+    private EnhanceItem curCenterItem { 
+        get 
+        {
+            return mCurCenterItem;
+        } 
+        set 
+        {
+            mCurCenterItem = value;
+            centerCallback?.Invoke(value);
+        } 
+    }
     private EnhanceItem preCenterItem;
 
     // if we can change the target item
@@ -48,7 +59,9 @@ public class EnhanceScrollView : MonoBehaviour
     // 最大唯一索引
     public int maxUniqueIndex = 20;
     public Action<int, Transform> refreshItemCallback { get; private set; }
+    private Action<EnhanceItem> centerCallback;
     private bool needUpdateUniqueIndex = true;
+    
 
     // 循环模式
     public bool loopMode = false;
@@ -145,10 +158,11 @@ public class EnhanceScrollView : MonoBehaviour
         this.enableLerpTween = false;
     }
 
-    public void Init(int maxAmount, Action<int, Transform> refreshItemCallback)
+    public void Init(int maxAmount, Action<int, Transform> refreshItemCallback, Action<EnhanceItem> centerCallback)
     {
         maxUniqueIndex = maxAmount;
         this.refreshItemCallback = refreshItemCallback;
+        this.centerCallback = centerCallback;
     }
 
     /// 
