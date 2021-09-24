@@ -14,6 +14,8 @@ public class UDragEnhanceView : EventTrigger
     public override void OnBeginDrag(PointerEventData eventData)
     {
         base.OnBeginDrag(eventData);
+        if (enhanceScrollView != null)
+            enhanceScrollView.OnDragEnhanceViewBegin();
     }
 
     public override void OnDrag(PointerEventData eventData)

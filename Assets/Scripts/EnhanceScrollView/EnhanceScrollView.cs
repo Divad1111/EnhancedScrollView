@@ -23,6 +23,9 @@ public class EnhanceScrollView : MonoBehaviour
     [Range(-1.0f, 1.0f)]
     public float xOffset = 0;
 
+    [SerializeField]
+    private bool enableDrag = true;
+
     // Lerp duration
     public float lerpDuration = 0.2f;
     private float mCurrentDuration = 0.0f;
@@ -75,7 +78,7 @@ public class EnhanceScrollView : MonoBehaviour
 
     public void EnableDrag(bool isEnabled)
     {
-        
+        enableDrag = isEnabled;
     }
 
     // targets enhance item in scroll view
@@ -160,7 +163,10 @@ public class EnhanceScrollView : MonoBehaviour
 
     public void Init(int maxAmount, Action<int, Transform> refreshItemCallback, Action<EnhanceItem> centerCallback)
     {
-        maxUniqueIndex = maxAmount;
+        if (maxAmount < 0) 
+            Debug.LogError("maxAmount必须大于等于零");
+
+        maxUniqueIndex =  Mathf.Max(maxAmount, 0);
         this.refreshItemCallback = refreshItemCallback;
         this.centerCallback = centerCallback;
     }
@@ -369,11 +375,6 @@ public class EnhanceScrollView : MonoBehaviour
     {
         if (!canChangeItem || !CanMoveBottom())
             return;
-        //int targetIndex = curCenterItem.CurveOffSetIndex + 1;
-        //if (targetIndex > listEnhanceItems.Count - 1)
-        //    targetIndex = 0;
-        //SetVerticalTargetItemIndex(listEnhanceItems[targetIndex]);
-
 
         SetVerticalTargetItemIndex(GetPrevItem());
     }
@@ -383,10 +384,7 @@ public class EnhanceScrollView : MonoBehaviour
     {
         if (!canChangeItem || !CanMoveTop())
             return;
-        //int targetIndex = curCenterItem.CurveOffSetIndex - 1;
-        //if (targetIndex < 0)
-        //    targetIndex = listEnhanceItems.Count - 1;
-        //SetVerticalTargetItemIndex(listEnhanceItems[targetIndex]);
+        
         SetVerticalTargetItemIndex(GetNextItem());
     }
 
@@ -443,11 +441,21 @@ public class EnhanceScrollView : MonoBehaviour
         return listEnhanceItems[targetIndex];
     }
 
+    // 开始拖拽
+    public void OnDragEnhanceViewBegin()
+    {
+        if (!enableDrag)
+            return;
+    }
+
     public float factor = 0.001f;
     private float dragValue = 0.0f;
-    // On Drag Move
+    // 拖拽中
     public void OnDragEnhanceViewMove(Vector2 delta)
-    {   
+    {
+        if (!enableDrag)
+            return;
+
         if (Mathf.Abs(delta.y) > 0.0f)
         {   
             var yDelta = delta.y * factor;
@@ -463,8 +471,6 @@ public class EnhanceScrollView : MonoBehaviour
                 if (!CanMoveBottom())
                     return;
             }
-
-            
 
             curVerticalValue += yDelta;
             dragValue += yDelta;
@@ -482,9 +488,12 @@ public class EnhanceScrollView : MonoBehaviour
         }
     }
 
-    // On Drag End
+    // 结束拖拽
     public void OnDragEnhanceViewEnd()
     {
+        if (!enableDrag)
+            return;
+
         // reset drag Value
         dragValue = 0.0f;
         
