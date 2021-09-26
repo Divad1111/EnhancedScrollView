@@ -140,8 +140,14 @@ public class EnhanceItem : MonoBehaviour
         curRealIndex = index;
     }
 
-    public virtual void SetUniqueIndex(int index)
-    {   
+    public virtual void SetUniqueIndex(int index, bool onlyUpdateValue = false)
+    {
+        if (onlyUpdateValue)
+        {
+            uniqueIndex = index;
+            return;
+        }
+        
         if (uniqueIndex != index || index == 0)
         {
             uniqueIndex = index;

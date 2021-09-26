@@ -169,6 +169,8 @@ public class EnhanceScrollView : MonoBehaviour
         maxUniqueIndex =  Mathf.Max(maxAmount, 0);
         this.refreshItemCallback = refreshItemCallback;
         this.centerCallback = centerCallback;
+        this.ResetUniqueIndex();
+        this.OnTweenOver();
     }
 
     /// 
@@ -184,6 +186,14 @@ public class EnhanceScrollView : MonoBehaviour
             float depthCurveValue = depthCurve.Evaluate(fValue + itemScript.CenterOffSet);
             float xOffsetValue = itemScript.GetWidth() * (1 - scaleValue) * 0.5f * xOffset;
             itemScript.UpdateScrollViewItems(yValue, depthCurveValue, depthFactor, listEnhanceItems.Count, xFixedPositionValue + xOffsetValue, scaleValue);
+        }
+    }
+
+    void ResetUniqueIndex()
+    {
+        foreach(var item in listEnhanceItems)
+        {
+            item.SetUniqueIndex(0, true);
         }
     }
 
