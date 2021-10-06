@@ -37,9 +37,9 @@ public class MyUGUIEnhanceItem : EnhanceItem
         rawImage.color = isCenter ? Color.white : Color.gray;
     }
 
-    public override void SetUniqueIndex(int index)
+    public override void SetUniqueIndex(int index, bool onlyUpdateValue = false)
     {
-        base.SetUniqueIndex(index);
+        base.SetUniqueIndex(index, onlyUpdateValue);
 
         txtIndex.text = index.ToString();
         

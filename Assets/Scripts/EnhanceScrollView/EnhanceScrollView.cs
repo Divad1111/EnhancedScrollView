@@ -211,8 +211,7 @@ public class EnhanceScrollView : MonoBehaviour
         SortEnhanceItem();
         
         foreach (var item in listSortedItems)
-        {
-            var itemUniqueIndex = item.UniqueIndex;
+        {   
             var itemNewUniqueIndex = curCenterItem.UniqueIndex + (item.RealIndex - curCenterItem.RealIndex);
             item.SetUniqueIndex(itemNewUniqueIndex);
 
