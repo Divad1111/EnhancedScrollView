@@ -60,14 +60,36 @@ public class EnhanceScrollView : MonoBehaviour
     public float curVerticalValue = 0.5f;
 
     // 最大唯一索引
-    public int maxUniqueIndex = 20;
+    [SerializeField]
+    //[Range(0, int.MaxValue)]
+    [Range(0, 2147483583)]
+    protected int _maxUniqueIndex = -1;
+    public int maxUniqueIndex 
+    { 
+        get { return _maxUniqueIndex; } 
+        set 
+        {
+            if (value < 0)
+                Debug.LogError("maxAmount必须大于等于零, 修正为零");
+
+            _maxUniqueIndex =  Mathf.Max(value, 0);
+        } 
+    }
+
+    // 刷新Item回调
     public Action<int, Transform> refreshItemCallback { get; private set; }
+
+    // item居中回调
     private Action<EnhanceItem> centerCallback;
+
+    // 时候需要更新唯一索引
     private bool needUpdateUniqueIndex = true;
-    
 
     // 循环模式
     public bool loopMode = false;
+
+    // 是否启用边界回弹
+    public bool enableElastic = true;
 
     // "depth" factor (2d widget depth or 3d Z value)
     private int depthFactor = 5;
@@ -163,10 +185,7 @@ public class EnhanceScrollView : MonoBehaviour
 
     public void Init(int maxAmount, Action<int, Transform> refreshItemCallback, Action<EnhanceItem> centerCallback)
     {
-        if (maxAmount < 0) 
-            Debug.LogError("maxAmount必须大于等于零");
-
-        maxUniqueIndex =  Mathf.Max(maxAmount, 0);
+        maxUniqueIndex = maxAmount;
         this.refreshItemCallback = refreshItemCallback;
         this.centerCallback = centerCallback;
         this.ResetUniqueIndex();
@@ -202,7 +221,7 @@ public class EnhanceScrollView : MonoBehaviour
         if (!needUpdateUniqueIndex)
             return;
 
-        if (maxUniqueIndex <= 0)
+        if (maxUniqueIndex < 0)
         {
             Debug.LogError("请先调用初始化函数Init");
             return;
@@ -402,7 +421,10 @@ public class EnhanceScrollView : MonoBehaviour
         if (loopMode)
             return true;
 
-        return curCenterItem.UniqueIndex > 0;
+        if (enableElastic)
+            return curCenterItem.UniqueIndex < maxUniqueIndex;
+        else
+            return curCenterItem.UniqueIndex < maxUniqueIndex - 1;
     }
 
     bool CanMoveBottom()
@@ -410,7 +432,10 @@ public class EnhanceScrollView : MonoBehaviour
         if (loopMode)
             return true;
 
-        return curCenterItem.UniqueIndex < maxUniqueIndex; 
+        if (enableElastic)
+            return curCenterItem.UniqueIndex >= 0;
+        else
+            return curCenterItem.UniqueIndex > 0;
     }
 
     /// <summary>
@@ -469,9 +494,7 @@ public class EnhanceScrollView : MonoBehaviour
         {   
             var yDelta = delta.y * factor;
             if (yDelta > 0.0f)
-            {
-                //if (curVerticalValue + yDelta > minVerticalValue + dFactor * 0.5F)
-                //    return;
+            {   
                 if (!CanMoveTop())
                     return;
             }

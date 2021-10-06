@@ -29,6 +29,9 @@ public class EnhanceItem : MonoBehaviour
         get
         {   
             var maxUniqueIndex = mEsv.maxUniqueIndex;
+            if (maxUniqueIndex <= 0)
+                return -1;
+
             int dataIndex = uniqueIndex % maxUniqueIndex;
             if (uniqueIndex < 0)
                 dataIndex = Mathf.Abs((maxUniqueIndex + uniqueIndex) % maxUniqueIndex);
@@ -151,7 +154,7 @@ public class EnhanceItem : MonoBehaviour
         if (uniqueIndex != index || index == 0)
         {
             uniqueIndex = index;
-            if (mEsv != null && mEsv.refreshItemCallback != null)
+            if (mEsv != null && mEsv.refreshItemCallback != null && DataIndex >= 0)
                 mEsv.refreshItemCallback.Invoke(DataIndex, transform);
         }
     }
