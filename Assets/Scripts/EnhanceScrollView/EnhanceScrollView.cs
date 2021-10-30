@@ -88,8 +88,13 @@ public class EnhanceScrollView : MonoBehaviour
     // 循环模式
     public bool loopMode = false;
 
-    // 是否启用边界回弹
-    public bool enableElastic = true;
+    // 回弹值
+    public float elastic = 0.2f;
+    private float curElastic = 0f;
+
+    // 拖拽因子
+    public float dragFactor = 0.001f;
+    private float dragValue = 0.0f;
 
     // "depth" factor (2d widget depth or 3d Z value)
     private int depthFactor = 5;
@@ -148,10 +153,7 @@ public class EnhanceScrollView : MonoBehaviour
         totalVerticalHeight = cellHeight * count;
         curCenterItem = listEnhanceItems[startCenterIndex];
         curVerticalValue = 0.5f - curCenterItem.CenterOffSet;
-        //minVerticalValue = curVerticalValue;
-        //maxVerticalValue = 10.0f;//dFactor * (count - startCenterIndex);
-        //initMinVerticalValue = minVerticalValue + (count - mCenterIndex) * dFactor;
-        //initMaxVerticalValue = maxVerticalValue;
+        elastic = Mathf.Max(elastic, 0);
         LerpTweenToTarget(0f, curVerticalValue, false);
 
         // 
@@ -420,11 +422,8 @@ public class EnhanceScrollView : MonoBehaviour
     {
         if (loopMode)
             return true;
-
-        if (enableElastic)
-            return curCenterItem.UniqueIndex < maxUniqueIndex;
-        else
-            return curCenterItem.UniqueIndex < maxUniqueIndex - 1;
+        
+        return curCenterItem.UniqueIndex < maxUniqueIndex - 1;
     }
 
     bool CanMoveBottom()
@@ -432,10 +431,7 @@ public class EnhanceScrollView : MonoBehaviour
         if (loopMode)
             return true;
 
-        if (enableElastic)
-            return curCenterItem.UniqueIndex >= 0;
-        else
-            return curCenterItem.UniqueIndex > 0;
+        return curCenterItem.UniqueIndex > 0;
     }
 
     /// <summary>
@@ -478,55 +474,85 @@ public class EnhanceScrollView : MonoBehaviour
     // 开始拖拽
     public void OnDragEnhanceViewBegin()
     {
-        if (!enableDrag)
+        if (!enableDrag || !canChangeItem)
             return;
     }
-
-    public float factor = 0.001f;
-    private float dragValue = 0.0f;
+ 
     // 拖拽中
     public void OnDragEnhanceViewMove(Vector2 delta)
     {
-        if (!enableDrag)
+        // 未启用拖拽
+        if (!enableDrag || !canChangeItem)
             return;
 
-        if (Mathf.Abs(delta.y) > 0.0f)
-        {   
-            var yDelta = delta.y * factor;
-            if (yDelta > 0.0f)
-            {   
-                if (!CanMoveTop())
+        // 没有拖拽位移
+        if (Mathf.Approximately(delta.y, 0.0F))
+            return;
+
+        // 处理边界回弹
+        var yDelta = delta.y * dragFactor;
+        bool up = yDelta > 0.0f;
+        if (up)
+        {
+            if (!CanMoveTop())
+            {
+                if (!CheckElastic())
                     return;
+
+                curElastic += yDelta;
+            }
+            else 
+            {
+                if (curElastic < 0 )
+                    curElastic = Mathf.Min(curElastic + yDelta, 0);
+            }
+        }
+        else
+        {
+            if (!CanMoveBottom())
+            {
+                if (!CheckElastic())
+                    return;
+
+                curElastic += yDelta;
             }
             else
             {
-                if (!CanMoveBottom())
-                    return;
+                if (curElastic > 0)
+                    curElastic = Mathf.Max(curElastic + yDelta, 0);
             }
-
-            curVerticalValue += yDelta;
-            dragValue += yDelta;
-            if (Mathf.Abs(dragValue) >= dFactor)
-            {
-                dragValue = 0.0f;
-                preCenterItem = curCenterItem;
-                if (yDelta > 0)
-                    curCenterItem = GetPrevItem();
-                else
-                    curCenterItem = GetNextItem();
-            }
-
-            LerpTweenToTarget(0.0f, curVerticalValue, false);
         }
+        
+        // 更新居中item
+        //dragValue += yDelta;
+        //if (Mathf.Abs(dragValue) >= dFactor)
+        //{
+        //    dragValue = 0.0f;
+        //    preCenterItem = curCenterItem;
+        //    if (yDelta > 0)
+        //        curCenterItem = GetPrevItem();
+        //    else
+        //        curCenterItem = GetNextItem();
+        //}
+
+        // 更新列表位置
+        curVerticalValue += yDelta;
+        LerpTweenToTarget(0.0f, curVerticalValue, false);
+    }
+
+    private bool CheckElastic()
+    {
+        return Mathf.Abs(curElastic) < elastic;
     }
 
     // 结束拖拽
     public void OnDragEnhanceViewEnd()
     {
-        if (!enableDrag)
+        if (!enableDrag || !canChangeItem)
             return;
 
-        // reset drag Value
+        canChangeItem = false;
+        curElastic = 0.0f;
         dragValue = 0.0f;
         
         // find closed item to be centered
@@ -549,6 +575,5 @@ public class EnhanceScrollView : MonoBehaviour
         preCenterItem = curCenterItem;
         curCenterItem = listEnhanceItems[closestIndex];
         LerpTweenToTarget(originVerticalValue, target, true);
-        canChangeItem = false;
     }
 }
