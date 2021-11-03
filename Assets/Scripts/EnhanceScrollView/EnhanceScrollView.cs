@@ -89,7 +89,7 @@ public class EnhanceScrollView : MonoBehaviour
     public bool loopMode = false;
 
     // 回弹值
-    public float elastic = 0.2f;
+    public float elastic = 0.03f;
     private float curElastic = 0f;
 
     // 拖拽因子
@@ -153,7 +153,7 @@ public class EnhanceScrollView : MonoBehaviour
         totalVerticalHeight = cellHeight * count;
         curCenterItem = listEnhanceItems[startCenterIndex];
         curVerticalValue = 0.5f - curCenterItem.CenterOffSet;
-        elastic = Mathf.Max(elastic, 0);
+        elastic = Mathf.Clamp(elastic, 0, dFactor * 0.3F);
         LerpTweenToTarget(0f, curVerticalValue, false);
 
         // 
@@ -355,7 +355,7 @@ public class EnhanceScrollView : MonoBehaviour
     {
         if (index < 0 || index > maxUniqueIndex) 
         {
-            Debug.LogError("index is out of range.");
+            Debug.LogError("索引超出范围");
             return;
         }
 
@@ -398,9 +398,8 @@ public class EnhanceScrollView : MonoBehaviour
             SetVerticalTargetItemIndex(jumpToItem);
         }
     }
-    
 
-    // Click the right button to select the next item.
+
     public void OnBtnPrevClick()
     {
         if (!canChangeItem || !CanMoveBottom())
@@ -409,7 +408,7 @@ public class EnhanceScrollView : MonoBehaviour
         SetVerticalTargetItemIndex(GetPrevItem());
     }
 
-    // Click the left button the select next next item.
+    
     public void OnBtnNextClick()
     {
         if (!canChangeItem || !CanMoveTop())
@@ -570,10 +569,13 @@ public class EnhanceScrollView : MonoBehaviour
                 min = dis;
             }
         }
+
+        
         originVerticalValue = curVerticalValue;
         float target = ((int)curVerticalValue + (tmp - listEnhanceItems[closestIndex].CenterOffSet));
         preCenterItem = curCenterItem;
         curCenterItem = listEnhanceItems[closestIndex];
+        Debug.LogFormat("居中项目索引：{0}, originVerticalValue:{1}, target:{2}", closestIndex, originVerticalValue, target);
         LerpTweenToTarget(originVerticalValue, target, true);
     }
 }
