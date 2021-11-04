@@ -150,10 +150,14 @@ public class EnhanceItem : MonoBehaviour
             uniqueIndex = index;
             return;
         }
-        
+
         if (uniqueIndex != index || index == 0)
         {
             uniqueIndex = index;
+
+            bool needShow = mEsv.loopMode || (index >= 0 && index < mEsv.maxUniqueIndex);
+            Show(needShow);
+
             if (mEsv != null && mEsv.refreshItemCallback != null && DataIndex >= 0)
                 mEsv.refreshItemCallback.Invoke(DataIndex, transform);
         }

@@ -155,10 +155,7 @@ public class EnhanceScrollView : MonoBehaviour
         curVerticalValue = 0.5f - curCenterItem.CenterOffSet;
         elastic = Mathf.Clamp(elastic, 0, dFactor * 0.3F);
         LerpTweenToTarget(0f, curVerticalValue, false);
-
-        // 
-        // enable the drag actions
-        // 
+    
         EnableDrag(true);
     }
 
@@ -247,6 +244,8 @@ public class EnhanceScrollView : MonoBehaviour
             }
         }
     }
+
+    
 
     void Update()
     {
@@ -362,7 +361,6 @@ public class EnhanceScrollView : MonoBehaviour
         bool isForward = index < curCenterItem.UniqueIndex;
         bool isBackwards = index > curCenterItem.UniqueIndex;
         EnhanceItem jumpToItem = null;
-        //int offset = 0;
         if (isForward)
         {
             var offset = Mathf.Min(curCenterItem.UniqueIndex - index, mCenterIndex);
@@ -398,7 +396,6 @@ public class EnhanceScrollView : MonoBehaviour
             SetVerticalTargetItemIndex(jumpToItem);
         }
     }
-
 
     public void OnBtnPrevClick()
     {
@@ -575,7 +572,7 @@ public class EnhanceScrollView : MonoBehaviour
         float target = ((int)curVerticalValue + (tmp - listEnhanceItems[closestIndex].CenterOffSet));
         preCenterItem = curCenterItem;
         curCenterItem = listEnhanceItems[closestIndex];
-        Debug.LogFormat("居中项目索引：{0}, originVerticalValue:{1}, target:{2}", closestIndex, originVerticalValue, target);
+        //Debug.LogFormat("居中项目索引：{0}, originVerticalValue:{1}, target:{2}", closestIndex, originVerticalValue, target);
         LerpTweenToTarget(originVerticalValue, target, true);
     }
 }
