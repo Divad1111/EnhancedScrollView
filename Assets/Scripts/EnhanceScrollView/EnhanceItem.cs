@@ -151,7 +151,7 @@ public class EnhanceItem : MonoBehaviour
             return;
         }
 
-        if (uniqueIndex != index || index == 0)
+        if (uniqueIndex != index)
         {
             uniqueIndex = index;
 

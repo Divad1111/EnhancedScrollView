@@ -211,7 +211,7 @@ public class EnhanceScrollView : MonoBehaviour
     {
         foreach(var item in listEnhanceItems)
         {
-            item.SetUniqueIndex(0, true);
+            item.SetUniqueIndex(-1, true);
         }
     }
 
