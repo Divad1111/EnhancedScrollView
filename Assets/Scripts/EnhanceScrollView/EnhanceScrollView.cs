@@ -82,8 +82,8 @@ public class EnhanceScrollView : MonoBehaviour
     // item居中回调
     private Action<EnhanceItem> centerCallback;
 
-    // 时候需要更新唯一索引
-    private bool needUpdateUniqueIndex = true;
+    // 是否需要刷新Item，主要用于直接跳转到指定索引时，避免重复刷新
+    private bool needRefreshItem = true;
 
     // 循环模式
     public bool loopMode = false;
@@ -217,9 +217,6 @@ public class EnhanceScrollView : MonoBehaviour
 
     void UpdateUniqueIndex()
     {
-        if (!needUpdateUniqueIndex)
-            return;
-
         if (maxUniqueIndex < 0)
         {
             Debug.LogError("请先调用初始化函数Init");
@@ -231,20 +228,15 @@ public class EnhanceScrollView : MonoBehaviour
         foreach (var item in listSortedItems)
         {   
             var itemNewUniqueIndex = curCenterItem.UniqueIndex + (item.RealIndex - curCenterItem.RealIndex);
-            item.SetUniqueIndex(itemNewUniqueIndex);
-
-            if (loopMode)
-            {
-                item.Show(true);
-            }
-            else
-            {
-                bool needShow = itemNewUniqueIndex >= 0 && itemNewUniqueIndex < maxUniqueIndex;
-                item.Show(needShow);
-            }
+            item.SetUniqueIndex(itemNewUniqueIndex, !needRefreshItem);
         }
     }
 
+    void UpdateShowState()
+    {
+        foreach (var item in listSortedItems)
+            item.UpdateShowState();
+    }
     
 
     void Update()
@@ -273,12 +265,13 @@ public class EnhanceScrollView : MonoBehaviour
     private void OnTweenOver()
     {
         UpdateUniqueIndex();
+        UpdateShowState();
         if (preCenterItem != null)
             preCenterItem.SetSelectState(false);
         if (curCenterItem != null)
             curCenterItem.SetSelectState(true);
 
-        needUpdateUniqueIndex = true;
+        needRefreshItem = true;
     }
 
     // Get the evaluate value to set item's scale
@@ -381,6 +374,7 @@ public class EnhanceScrollView : MonoBehaviour
             {
                 var curPrevItem = GetPrevItem(i, jumpToItem);
                 curPrevItem.SetUniqueIndex(index - i);
+                curPrevItem.UpdateShowState();
                 var curNextItem = GetNextItem(i, jumpToItem);
                 curNextItem.SetUniqueIndex(index + i);
             }
@@ -392,7 +386,7 @@ public class EnhanceScrollView : MonoBehaviour
                 curNextItem.SetUniqueIndex(index + lastIndex);
             }
 
-            needUpdateUniqueIndex = false;
+            needRefreshItem = false;
             SetVerticalTargetItemIndex(jumpToItem);
         }
     }

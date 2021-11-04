@@ -155,11 +155,14 @@ public class EnhanceItem : MonoBehaviour
         {
             uniqueIndex = index;
 
-            bool needShow = mEsv.loopMode || (index >= 0 && index < mEsv.maxUniqueIndex);
-            Show(needShow);
-
             if (mEsv != null && mEsv.refreshItemCallback != null && DataIndex >= 0)
                 mEsv.refreshItemCallback.Invoke(DataIndex, transform);
         }
+    }
+    
+    public void UpdateShowState()
+    {
+        bool needShow = mEsv.loopMode || (uniqueIndex >= 0 && uniqueIndex < mEsv.maxUniqueIndex);
+        Show(needShow);
     }
 }
