@@ -191,9 +191,8 @@ public class EnhanceScrollView : MonoBehaviour
         this.OnTweenOver();
     }
 
-    /// 
-    /// Update EnhanceItem state with curve fTime value
-    /// 
+    
+    // 根据当前值更新Item位置，并更新唯一索引
     public void UpdateEnhanceScrollView(float fValue)
     {
         for (int i = 0; i < listEnhanceItems.Count; i++)
@@ -205,6 +204,9 @@ public class EnhanceScrollView : MonoBehaviour
             float xOffsetValue = itemScript.GetWidth() * (1 - scaleValue) * 0.5f * xOffset;
             itemScript.UpdateScrollViewItems(yValue, depthCurveValue, depthFactor, listEnhanceItems.Count, xFixedPositionValue + xOffsetValue, scaleValue);
         }
+
+        UpdateUniqueIndex();
+        UpdateShowState();
     }
 
     void ResetUniqueIndex()
@@ -237,7 +239,7 @@ public class EnhanceScrollView : MonoBehaviour
         foreach (var item in listSortedItems)
             item.UpdateShowState();
     }
-    
+
 
     void Update()
     {

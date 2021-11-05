@@ -154,7 +154,7 @@ public class EnhanceItem : MonoBehaviour
         if (uniqueIndex != index)
         {
             uniqueIndex = index;
-
+           
             if (mEsv != null && mEsv.refreshItemCallback != null && DataIndex >= 0)
                 mEsv.refreshItemCallback.Invoke(DataIndex, transform);
         }
