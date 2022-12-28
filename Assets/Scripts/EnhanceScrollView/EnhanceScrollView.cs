@@ -39,10 +39,12 @@ public class EnhanceScrollView : MonoBehaviour
         {
             return mCurCenterItem;
         } 
-        set 
+        set
         {
+            var oldCurCenterItem = mCurCenterItem; 
             mCurCenterItem = value;
-            centerCallback?.Invoke(value);
+            if(mCurCenterItem != oldCurCenterItem)
+                centerCallback?.Invoke(value);
         } 
     }
     private EnhanceItem preCenterItem;
@@ -483,6 +485,7 @@ public class EnhanceScrollView : MonoBehaviour
 
         // 处理边界回弹
         var yDelta = delta.y * dragFactor;
+        yDelta = Mathf.Clamp(yDelta, -1*dFactor, dFactor); // 单次不能滑动操作一个Item
         bool up = yDelta > 0.0f;
         if (up)
         {
@@ -516,16 +519,21 @@ public class EnhanceScrollView : MonoBehaviour
         }
         
         // 更新居中item
-        //dragValue += yDelta;
-        //if (Mathf.Abs(dragValue) >= dFactor)
-        //{
-        //    dragValue = 0.0f;
-        //    preCenterItem = curCenterItem;
-        //    if (yDelta > 0)
-        //        curCenterItem = GetPrevItem();
-        //    else
-        //        curCenterItem = GetNextItem();
-        //}
+        dragValue += yDelta;
+        if (Mathf.Abs(dragValue) >= dFactor)
+        {   
+            preCenterItem = curCenterItem;
+            if (dragValue > 0)
+            {
+                dragValue -= dFactor;
+                curCenterItem = GetNextItem();
+            }
+            else
+            {
+                dragValue += dFactor;
+                curCenterItem = GetPrevItem();
+            }
+        }
 
         // 更新列表位置
         curVerticalValue += yDelta;

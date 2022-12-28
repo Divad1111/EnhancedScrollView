@@ -131,6 +131,8 @@ public class EnhanceItem : MonoBehaviour
 
     protected virtual void SetItemDepth(float depthCurveValue, int depthFactor, float itemCount)
     {
+		int newDepth = (int)(depthCurveValue * itemCount);
+        this.transform.SetSiblingIndex(newDepth);
     }
 
     // Set the item center state

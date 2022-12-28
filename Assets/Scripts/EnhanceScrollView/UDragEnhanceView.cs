@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Diagnostics;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using Debug = UnityEngine.Debug;
 
 public class UDragEnhanceView : EventTrigger
 {
